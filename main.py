@@ -23,28 +23,28 @@ def init_db():
 init_db()
 
 @mcp.tool
-def add_expense(date, amount, category, subcategory="", note=""):
+def add_expense(date: str, amount: float, category: str, subcategory: str = "", note: str = ""):
     """Add an expense to the database"""
     with sqlite3.connect(DB_PATH) as c:
         cur = c.execute(
             "INSERT INTO expenses(date, amount, category, subcategory, note) VALUES (?,?,?,?,?)",
             (date, amount, category, subcategory, note)
         )
-        return {"status":"ok","id":cur.lastrowid}
+        return {"status": "ok", "id": cur.lastrowid}
     
 @mcp.tool
-def list_expenses(start_date, end_date):
+def list_expenses(start_date: str, end_date: str):
     """List all expenses from the database"""
     with sqlite3.connect(DB_PATH) as c:
         cur = c.execute("SELECT id, date, amount, category, subcategory, note FROM expenses WHERE date between ? and ? ORDER by id ASC", (start_date, end_date))
         cols = [d[0] for d in cur.description]
-        return [dict(zip(cols,r)) for r in cur.fetchall()]
+        return [dict(zip(cols, r)) for r in cur.fetchall()]
     
 @mcp.tool
-def summarize(start_date, end_date, category=None):
+def summarize(start_date: str, end_date: str, category: str = None):
     """Summarize expenses by category on the basis of the date range"""
     with sqlite3.connect(DB_PATH) as c:
-        query=(
+        query = (
             """
             SELECT category, SUM(amount) as Total_amount
             FROM expenses
@@ -54,13 +54,13 @@ def summarize(start_date, end_date, category=None):
         params = [start_date, end_date]
 
         if category:
-            query += "AND category = ?"
+            query += " AND category = ?"
             params.append(category)
-        query += "GROUP BY category ORDER BY category ASC"
+        query += " GROUP BY category ORDER BY category ASC"
 
         cur = c.execute(query, params)
         cols = [d[0] for d in cur.description]
-        return [dict(zip(cols,r)) for r in cur.fetchall()]
+        return [dict(zip(cols, r)) for r in cur.fetchall()]
     
 @mcp.resource("expense://categories", mime_type="application/json")
 def resources():
