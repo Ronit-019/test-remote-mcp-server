@@ -1,5 +1,5 @@
 from fastmcp import FastMCP
-import aiosqlite3
+import aiosqlite
 import os
 import tempfile
 import asyncio
@@ -14,7 +14,7 @@ mcp = FastMCP("Expense Tracker")
 
 async def init_db():
     try :
-        async with aiosqlite3.connect(DB_PATH) as c:
+        async with aiosqlite.connect(DB_PATH) as c:
             await c.execute("PRAGMA journal_mode=WAL")
             await c.execute("""
                 CREATE TABLE IF NOT EXISTS expenses(
@@ -39,7 +39,7 @@ asyncio.run(init_db())
 async def add_expense(date: str, amount: float, category: str, subcategory: str = "", note: str = ""):
     """Add a new expense entry to the database"""
     try:
-        async with aiosqlite3.connect(DB_PATH) as c:
+        async with aiosqlite.connect(DB_PATH) as c:
             cur = await c.execute(
                 "INSERT INTO expenses(date, amount, category, subcategory, note) VALUES (?,?,?,?,?)",
                 (date, amount, category, subcategory, note)
@@ -56,7 +56,7 @@ async def add_expense(date: str, amount: float, category: str, subcategory: str 
 async def list_expenses(start_date: str, end_date: str):
     """List all expenses from the database within an inclusive range"""
     try:
-        async with aiosqlite3.connect(DB_PATH) as c:
+        async with aiosqlite.connect(DB_PATH) as c:
             cur = await c.execute("SELECT id, date, amount, category, subcategory, note FROM expenses WHERE date between ? and ? ORDER by id ASC", (start_date, end_date))
             cols = [d[0] for d in cur.description]
             return [dict(zip(cols, r)) for r in await cur.fetchall()]
@@ -67,7 +67,7 @@ async def list_expenses(start_date: str, end_date: str):
 async def summarize(start_date: str, end_date: str, category: str = None):
     """Summarize expenses by category on the basis of the date range"""
     try:
-        async with aiosqlite3.connect(DB_PATH) as c:
+        async with aiosqlite.connect(DB_PATH) as c:
             query = (
                 """
                 SELECT category, SUM(amount) as Total_amount
