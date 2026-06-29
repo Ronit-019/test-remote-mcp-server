@@ -25,7 +25,7 @@ def init_db():
                     note TEXT DEFAULT ''
                     )
             """)
-            c.execute("INSERT OR INGNORE INTO expenses(date, amount, category) VALUES ('2000-01-01',1000,'food')")
+            c.execute("INSERT OR IGNORE INTO expenses(date, amount, category) VALUES ('2000-01-01',1000,'food')")
             c.execute("DELETE FROM expenses WHERE category='test'")
             print("Database initialized successfully with write access")
     except Exception as e:
